@@ -184,6 +184,9 @@ require('lazy').setup({
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
+
+    -- for icons next to file types
+    dependencies = { 'kyazdani42/nvim-web-devicons'},
     -- See `:help lualine.txt`
     opts = {
       options = {
@@ -191,6 +194,15 @@ require('lazy').setup({
         theme = 'onedark',
         --component_separators = '|',
         --section_separators = '',
+      },
+      -- add icons to the filetype
+      sections = {
+        lualine_x = {'encoding', 'fileformat',{
+          'filetype',
+          colored = true,   -- Displays filetype icon in color if set to true
+          icon_only = false, -- Display only an icon for filetype
+          icon = { align = 'right' },
+        }}
       },
     },
   },
