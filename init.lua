@@ -43,6 +43,22 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- default tabstop
+vim.o["tabstop"] = 4
+vim.o["shiftwidth"] = 4
+vim.o["softtabstop"] = 4
+vim.o["expandtab"] = true
+
+-- source: https://github.com/LazyVim/LazyVim/discussions/4008
+-- filter which-key warnings
+local orig_notify = vim.notify
+vim.notify = function(msg, level, opts)
+  if msg:match("which%-key") and level == vim.log.levels.WARN then
+    return
+  end
+  orig_notify(msg, level, opts)
+end
+
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -105,7 +121,8 @@ require('lazy').setup({
       'hrsh7th/cmp-nvim-lsp',
 
       -- Adds a number of user-friendly snippets
-      'rafamadriz/friendly-snippets',
+      --'rafamadriz/friendly-snippets',
+      'fsasm/friendly-snippets',
     },
   },
 
@@ -167,17 +184,35 @@ require('lazy').setup({
     },
   },
 
+  --{
+  --  -- Theme inspired by Atom
+  --  'navarasu/onedark.nvim',
+  --  priority = 1000,
+  --  config = function()
+  --    require('onedark').setup {
+  --      style = 'darker',
+  --      transparent = true,
+  --      colors = { grey = "#6c7d9c" },
+  --    }
+  --    require('onedark').load()
+  --  end,
+  --},
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    "catppuccin/nvim",
     priority = 1000,
     config = function()
-      require('onedark').setup {
-        style = 'darker',
-        transparent = true,
-        colors = { grey = "#6c7d9c" },
+      -- load the catppuccin theme
+      require("catppuccin").setup {
+        flavour = "mocha",
+        color_overrides = {
+          mocha = {
+            base = "#000000",
+            mantle = "#000000",
+            crust = "#000000",
+          },
+        },
       }
-      require('onedark').load()
+      vim.cmd.colorscheme "catppuccin"
     end,
   },
 
@@ -186,7 +221,7 @@ require('lazy').setup({
     'nvim-lualine/lualine.nvim',
 
     -- for icons next to file types
-    dependencies = { 'kyazdani42/nvim-web-devicons'},
+    dependencies = { 'kyazdani42/nvim-web-devicons' },
     -- See `:help lualine.txt`
     opts = {
       options = {
@@ -197,12 +232,12 @@ require('lazy').setup({
       },
       -- add icons to the filetype
       sections = {
-        lualine_x = {'encoding', 'fileformat',{
+        lualine_x = { 'encoding', 'fileformat', {
           'filetype',
-          colored = true,   -- Displays filetype icon in color if set to true
+          colored = true,    -- Displays filetype icon in color if set to true
           icon_only = false, -- Display only an icon for filetype
           icon = { align = 'right' },
-        }}
+        } }
       },
     },
   },
@@ -212,7 +247,7 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
-    main="ibl",
+    main = "ibl",
     opts = {
       indent = {
         char = '┊',
@@ -224,7 +259,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  --{ 'numToStr/Comment.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   {
@@ -254,6 +289,27 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
     build = ':TSUpdate',
+  },
+  {
+    'nvim-flutter/flutter-tools.nvim',
+    lazy = false,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'stevearc/dressing.nvim',   -- optional for vim.ui.select
+    },
+    config = function()
+      require('flutter-tools').setup {
+        --flutter_lookup_cmd = "dirname $(which flutter)",
+        flutter_path = "/home/fabjan/snap/flutter/common/flutter",
+        lsp = {
+          cmd = { "/home/fabjan/snap/flutter/common/flutter/bin/dart", "language-server", "--protocol=lsp" },
+        },
+      }
+    end,
+  },
+  {
+    'github/copilot.vim',
+    lazy = false,
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -548,9 +604,6 @@ local mason_lspconfig = require 'mason-lspconfig'
 
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
-}
-
-mason_lspconfig.setup_handlers {
   function(server_name)
     require('lspconfig')[server_name].setup {
       capabilities = capabilities,
@@ -604,14 +657,17 @@ cmp.setup {
   },
 }
 
+-- source: https://vi.stackexchange.com/a/39766
+-- remove trailing whitespace
+vim.keymap.set('n', '<Leader>tw', [[:%s/\s\+$//e<cr>]], {desc = 'Remove [T]railing [W]hitespace'})
 
--- default tabstop
-vim.o["tabstop"] = 4
-vim.o["shiftwidth"] = 4
-vim.o["softtabstop"] = 4
 
--- column size
-vim.o["colorcolumn"] = "80"
+-- line length limit
+-- everything left of the coloured column is inside the limit
+vim.o["colorcolumn"] = "81"
+
+-- files with ending *.h should be treated as C and not C++
+vim.g.c_syntax_for_h = 1
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
