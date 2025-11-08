@@ -172,6 +172,12 @@ vim.o.shiftwidth = 4
 vim.o.softtabstop = 4
 vim.o.expandtab = true
 
+-- 80 character per line ruler
+vim.o['colorcolumn'] = '81'
+
+-- files with ending *.h should be treated as C and not C++
+vim.g.c_syntax_for_h = 1
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -181,6 +187,10 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- source: https://vi.stackexchange.com/a/39766
+-- remove trailing whitespace
+vim.keymap.set('n', '<Leader>tw', [[:%s/\s\+$//e<cr>]], { desc = 'Remove [T]railing [W]hitespace' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -918,6 +928,9 @@ require('lazy').setup({
     config = function()
       require('catppuccin').setup {
         flavour = 'mocha',
+        blink_cmp = {
+          style = 'bordered',
+        },
         color_overrides = {
           mocha = {
             base = '#000000',
