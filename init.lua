@@ -925,6 +925,11 @@ require('lazy').setup({
             crust = '#000000',
           },
         },
+        custom_highlights = function(colors)
+          return {
+            WinSeparator = { fg = colors.flamingo },
+          }
+        end,
       }
       vim.cmd.colorscheme 'catppuccin'
     end,
